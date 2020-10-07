@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 
+#include "PRN_Node.h"
+
 #include <QDebug>
 
 QIlluminator::QIlluminator(QWidget *parent) : QMainWindow(parent)
@@ -16,6 +18,14 @@ QIlluminator::QIlluminator(QWidget *parent) : QMainWindow(parent)
 QIlluminator::~QIlluminator()
 {
 
+}
+
+void QIlluminator::DisplayPRN()
+{
+   for (int index = 0; index < connectors.count(); ++index)
+   {
+      qDebug() << connectors.at(index);
+   }
 }
 
 void QIlluminator::ParsePRN(QString filename)
@@ -32,7 +42,6 @@ void QIlluminator::ParsePRN(QString filename)
    while (!prn.atEnd())
    {
       QString line = QString::fromLocal8Bit(prn.readLine());
-      qDebug() << line;
       /*
       Anatomy of a PRN
       -----------------------------------------------------------------------------------------
@@ -87,7 +96,28 @@ void QIlluminator::ParsePRN(QString filename)
       'SET' lines: A set signal call will be found in code with the information contained in the 'MNEMONIC' section.
 
       */
+      //qDebug() << line;
+      if (line.contains(QRegularExpression("--+")) || line.contains("MNEMONIC"))
+      {
+         qDebug() << "Continuing" << line;
+         continue;
+      }
+      else
+      {
+         qDebug() << "Parsing line" << line;
+         //Start parsing here.
+         PRN_Node* node = new PRN_Node(this, line);
+         prnList.append(node);
+         
+         //Add connector to list of connectors
+         QString connector = node->GetConnector();
+         if (!connectors.contains(connector))
+         {
+            connectors.append(connector);
+         }
+      }
    }
+   DisplayPRN();
 }
 
 void QIlluminator::LoadPRN()

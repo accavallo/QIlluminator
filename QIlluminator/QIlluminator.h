@@ -4,6 +4,9 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_QIlluminator.h"
 
+QT_FORWARD_DECLARE_CLASS(QGraphicsView)
+QT_FORWARD_DECLARE_CLASS(QSlider)
+
 QT_FORWARD_DECLARE_CLASS(PRN_Node);
 
 class QIlluminator : public QMainWindow
@@ -17,14 +20,26 @@ public:
 private:
     Ui::QIlluminatorClass ui;
 
+    QList<PRN_Node*> prnList;
+
+    QStringList connectors;
+
+    QGraphicsView* view;
+
+    QSlider* zoomSlider;
+
+    QToolButton* zoomInBtn;
+    QToolButton* zoomOutBtn;
+
     void DisplayPRN();
     void ParsePRN(QString filename);
 
-    QList<PRN_Node*> prnList;
-    QStringList connectors;
-
 private slots:
     void LoadPRN();
+    void LoadPRNs();
+    void SetupMatrix();
+    void ZoomIn();
+    void ZoomOut();
 };
 
 #endif // QILLUMINATOR_H

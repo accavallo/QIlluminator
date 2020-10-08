@@ -2,9 +2,19 @@
 
 #include <QFile>
 #include <QFileDialog>
+#include <QGraphicsView>
 #include <QLabel>
+#include <qmath.h>
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QRegularExpression>
+
+#include <QGraphicsItem>
+#include <QGraphicsLineItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QSlider>
+#include <QToolButton>
 
 #include "PRN_Node.h"
 
@@ -13,12 +23,48 @@
 QIlluminator::QIlluminator(QWidget *parent) : QMainWindow(parent)
 {
     ui.setupUi(this);
+
+    const short SIZE = 25;
+    
+    view = this->findChild<QGraphicsView*>("graphicsView");
+
+    QSize iconSize(SIZE, SIZE);
+    zoomInBtn = new QToolButton(this);
+    zoomInBtn->setGeometry(view->x() + view->width(), view->y() + this->findChild<QMenuBar*>("menuBar")->height(), SIZE, SIZE);
+    zoomInBtn->setAutoRepeat(true);
+    zoomInBtn->setAutoRepeatInterval(33);
+    zoomInBtn->setAutoRepeatDelay(0);
+    zoomInBtn->setIcon(QPixmap(":/QIlluminator/Resources/zoomin.png"));
+    zoomInBtn->setIconSize(iconSize);
+
+    zoomOutBtn = new QToolButton(this);
+    zoomOutBtn->setGeometry(view->x() + view->width(), view->y() + view->height() + this->findChild<QMenuBar*>("menuBar")->height() - SIZE, SIZE, SIZE);
+    zoomOutBtn->setAutoRepeat(true);
+    zoomOutBtn->setAutoRepeatInterval(33);
+    zoomOutBtn->setAutoRepeatDelay(0);
+    zoomOutBtn->setIcon(QPixmap(":/QIlluminator/Resources/zoomout.png"));
+    zoomOutBtn->setIconSize(iconSize);
+
+    zoomSlider = new QSlider(this);
+    zoomSlider->setMinimum(0);
+    zoomSlider->setMaximum(300);
+    zoomSlider->setValue(250);
+    zoomSlider->setTickPosition(QSlider::TicksRight);
+    zoomSlider->setGeometry(zoomInBtn->x(), zoomInBtn->y() + SIZE, SIZE, zoomOutBtn->y() - zoomInBtn->y() - SIZE);
+    
+    connect(zoomInBtn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
+    connect(zoomOutBtn, SIGNAL(clicked()), this, SLOT(ZoomOut()));
+    connect(zoomSlider, SIGNAL(valueChanged(int)), this, SLOT(SetupMatrix()));
+
+    SetupMatrix();
 }
 
 QIlluminator::~QIlluminator()
 {
 
 }
+
+//Private Functions
 
 void QIlluminator::DisplayPRN()
 {
@@ -120,8 +166,17 @@ void QIlluminator::ParsePRN(QString filename)
    DisplayPRN();
 }
 
+//Private Slots
+
 void QIlluminator::LoadPRN()
 {
+   for (int ind = prnList.count() - 1; ind >= 0; --ind)
+   {
+      delete prnList[ind];
+      prnList.removeAt(ind);
+   }
+   connectors = QStringList();
+
    QString username = "";
    QString desktopDir = "";
    QString userprofile = QString::fromLocal8Bit(qgetenv("USERPROFILE"));
@@ -149,8 +204,69 @@ void QIlluminator::LoadPRN()
       return;
    }
 
-
-
    this->findChild<QLabel*>("prnLbl")->setText(QFileInfo(fileName).fileName());
    ParsePRN(fileName);
+}
+
+void QIlluminator::LoadPRNs()
+{
+   for (int ind = prnList.count() - 1; ind >= 0; --ind)
+   {
+      delete prnList[ind];
+      prnList.removeAt(ind);
+   }
+   connectors = QStringList();
+
+   QString username = "";
+   QString desktopDir = "";
+   QString userprofile = QString::fromLocal8Bit(qgetenv("USERPROFILE"));
+   if (userprofile.isEmpty())
+   {
+      QString username = QString::fromLocal8Bit(qgetenv("USERNAME"));
+      if (!username.isEmpty())
+      {
+         desktopDir = QString("C:\\Users\\%1\\Desktop").arg(username);
+      }
+   }
+   else
+   {
+      desktopDir = QString("%1\\Desktop").arg(userprofile);
+   }
+
+   if (desktopDir.isEmpty())
+   {
+      desktopDir = QString("%USERPROFILE%\\Desktop");
+   }
+   QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose your PRN", desktopDir/*"U:\\"*/, "PRN Files (*.prn);;Text Files (*.txt);;All Files (*.*)");
+
+   if (fileNames.isEmpty())
+   {
+      return;
+   }
+
+   this->findChild<QLabel*>("prnLbl")->setText("Multiple files loaded");
+   foreach(QString name, fileNames)
+   {
+      ParsePRN(name);
+   }
+}
+
+void QIlluminator::SetupMatrix()
+{
+   qreal scale = qPow(qreal(2), (zoomSlider->value() - 250) / qreal(50));
+
+   QMatrix matrix;
+   matrix.scale(scale, scale);
+
+   view->setMatrix(matrix);
+}
+
+void QIlluminator::ZoomIn()
+{
+   zoomSlider->setValue(zoomSlider->value() + 1);
+}
+
+void QIlluminator::ZoomOut()
+{
+   zoomSlider->setValue(zoomSlider->value() - 1);
 }

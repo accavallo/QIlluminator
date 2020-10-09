@@ -247,6 +247,7 @@ void QIlluminator::LoadPRNs()
    this->findChild<QLabel*>("prnLbl")->setText("Multiple files loaded");
    foreach(QString name, fileNames)
    {
+      qDebug() << "Now parsing " << QFileInfo(name).fileName();
       ParsePRN(name);
    }
 }

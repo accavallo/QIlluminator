@@ -21,6 +21,7 @@
 bld/
 [Bb]in/
 [Oo]bj/
+[Gg]enerated Files/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -81,6 +82,9 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
+moc*
+ui_*
+qrc_*
 
 # Visual Studio profiler
 *.psess

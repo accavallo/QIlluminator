@@ -43,6 +43,16 @@
      <string/>
     </property>
    </widget>
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>50</y>
+      <width>575</width>
+      <height>330</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -58,12 +68,18 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_PRN"/>
+    <addaction name="actionLoad_PRNs"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <action name="actionLoad_PRN">
    <property name="text">
     <string>Load PRN...</string>
+   </property>
+  </action>
+  <action name="actionLoad_PRNs">
+   <property name="text">
+    <string>Load PRNs...</string>
    </property>
   </action>
  </widget>
@@ -88,8 +104,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLoad_PRNs</sender>
+   <signal>triggered()</signal>
+   <receiver>QIlluminatorClass</receiver>
+   <slot>LoadPRNs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>LoadPRN()</slot>
+  <slot>LoadPRNs()</slot>
  </slots>
 </ui>

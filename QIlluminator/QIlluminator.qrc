@@ -1,4 +1,6 @@
 <RCC>
-    <qresource prefix="QIlluminator">
+    <qresource prefix="/QIlluminator">
+        <file>Resources/zoomin.png</file>
+        <file>Resources/zoomout.png</file>
     </qresource>
 </RCC>
